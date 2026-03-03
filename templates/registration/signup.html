@@ -1,0 +1,24 @@
+{% extends "common.html" %}
+    {% block title %} signup {% endblock title %}
+    {% block content %}
+    {% load static %}
+    {% load humanize %}
+    {% load crispy_forms_tags %}
+    
+      <div class="container col-md-3 my-4 shadow-sm p-4 border rounded bg-light">
+        <h4 class="text-center text-dark">signup</h4>
+        <form method="post" class="text-dark">
+            {% csrf_token %}
+            {{form|crispy}}
+            <button class="btn btn-sm btn-dark w-100">Submit</button>
+            <hr>
+            <div class="d-flex justify-content-between">
+                <p class="text-center text-dark">Already have an accout</p>
+                <a href="{% url "login" %}" class="text-decoration-none">login</a>
+            </div>
+        </form>
+    </div>
+   
+ 
+
+    {% endblock %}

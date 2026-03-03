@@ -1,0 +1,32 @@
+{% extends "common.html" %}
+    {% block title %} Profile {% endblock title %}
+    {% block content %}
+    {% load static %}
+    {% load humanize %}
+    {% load crispy_forms_tags %}
+
+
+    {% include "message.html" %}
+    <div class="container d-flex p-2 mt-5">
+        <div class="col-md-2 container">
+            {% if profile.passport %}
+                <img class="" src="{{profile.passport.url}}" alt="" height=100>
+            {% else %}
+                <img src="" alt="profile picture" height=100>
+            {% endif %}
+            <h6 class="text-center mt-2">{{profile.role|upper}}</h6>
+        </div>
+        <div class="col-md-10">
+            <div>
+                <h5>{{profile.user.first_name}} {{profile.user.last_name}}</h5>
+                <p><span class="fw-medium">Email: </span>{{profile.user.email}}</p>
+                <p><span class="fw-medium">Bio: </span>{{profile.bio}}</p>
+                <p><span class="fw-medium">Address: </span>{{profile.country}}</p>
+                <p><span class="fw-medium">Phone: </span>{{profile.phone}}</p>
+
+                <a href="{% url "edit-profile" profile.user.id %}" class="btn btn-sm btn-dark">Edit</a>
+            </div>
+        </div>
+    </div>
+    
+    {% endblock %}

@@ -1,0 +1,5 @@
+{% if messages %}
+        {% for messages in  messages %}
+        <p class="alert alert-{{messages.tags}} col-md-2 fixed-botton ms-auto"> {{messages}}</p>        
+        {% endfor %}
+    {% endif %}

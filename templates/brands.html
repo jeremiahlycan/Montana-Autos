@@ -1,0 +1,26 @@
+{% extends "common.html" %}
+    {% block title %} Montana Autos {% endblock title %}
+    {% load static %}
+    {% block content %}
+    {% load humanize %}
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">Our Brands</h2>
+
+        <div class="row">
+            {% for category in categories %}         
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm text-center p-4 h-100">
+                    <h5>{{ category.label }}</h5>
+                    <p>{{ category.total }} Cars Available</p>
+                    <a href="{% url 'brand-products' category.key %}" class="btn btn-dark btn-sm">
+                        View Cars
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+
+    {% endblock content %}

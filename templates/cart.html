@@ -1,0 +1,147 @@
+{% extends "common.html" %}
+{% load humanize %}
+{% block title %}Your Cart — MLA{% endblock %}
+{% block content %}
+
+<div class="container py-5 mb-5 pb-5">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-warning mb-0">
+            <i class="fas fa-shopping-cart me-2"></i>Your Cart
+        </h2>
+        {% if cart_items %}
+        <a href="{% url 'clear-cart' %}"
+           class="btn btn-sm btn-danger"
+           style="border-radius:12px;"
+           onclick="return confirm('Are you sure you want to clear your cart?')">
+            <i class="fas fa-trash me-1"></i> Clear Cart
+        </a>
+        {% endif %}
+    </div>
+
+    {% if cart_items %}
+    <div class="row">
+
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            {% for item in cart_items %}
+            <div class="card cart-card mb-3" style="background:#1a1a1a; border:1px solid #d4af37;">
+                <div class="d-flex align-items-center p-2 gap-3">
+
+                    <!-- Car Image -->
+                    {% if item.image %}
+                    <img src="{{ item.image }}"
+                         alt="{{ item.title }}"
+                         style="width:75px; height:65px; object-fit:cover; border-radius:8px; flex-shrink:0;">
+                    {% endif %}
+
+                    <!-- Car Details -->
+                    <div class="flex-grow-1">
+                        <h6 class="text-warning mb-1" style="font-size:0.85rem;">{{ item.title|title }}</h6>
+
+                        {% if item.quantity >= item.stock %}
+                        <p class="text-danger mb-1" style="font-size:0.7rem;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Only {{ item.stock }} unit(s) available
+                        </p>
+                        {% endif %}
+
+                        <!-- Quantity Form -->
+                        <form action="{% url 'update-cart' item.id %}"
+                              method="POST"
+                              class="d-flex align-items-center gap-2">
+                            {% csrf_token %}
+                            <input type="number"
+                                   name="quantity"
+                                   value="{{ item.quantity }}"
+                                   min="0"
+                                   max="{{ item.stock }}"
+                                   class="form-control form-control-sm text-center"
+                                   style="width:50px; background:#0b0b0b; color:#fff; border:1px solid #d4af37; font-size:0.8rem;">
+                            <button type="submit"
+                                class="btn btn-sm fw-bold"
+                                style="background:#d4af37 !important; color:#000 !important; border-radius:10px; font-size:0.75rem; padding:3px 10px;">
+                                Update
+                            </button>
+                            <a href="{% url 'remove-from-cart' item.id %}"
+                               class="btn btn-sm btn-danger"
+                               style="font-size:0.75rem; padding:3px 8px;"
+                               onclick="return confirm('Remove this car from cart?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </form>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="text-end" style="flex-shrink:0;">
+                        <p class="text-warning fw-bold mb-0" style="font-size:0.85rem;">
+                            ₦{{ item.price|intcomma }}
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card p-4" style="background:#1a1a1a; border:1px solid #d4af37;">
+                <h5 class="text-warning mb-3">Order Summary</h5>
+
+                {% for item in cart_items %}
+                <div class="d-flex justify-content-between text-light mb-1 small">
+                    <span class="text-truncate me-2">
+                        {{ item.title|title }} x{{ item.quantity }}
+                    </span>
+                    <span class="text-nowrap">₦{{ item.price|intcomma }}</span>
+                </div>
+                {% endfor %}
+
+                <hr style="border-color:#d4af37;">
+
+                <div class="d-flex justify-content-between text-light mb-1">
+                    <span>Items</span>
+                    <span>{{ cart_count }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between text-warning fw-bold fs-5 mt-2">
+                    <span>Total</span>
+                    <span>₦{{ total|intcomma }}</span>
+                </div>
+
+                <a href="{% url 'checkout' %}"
+                   class="btn w-100 mt-4 fw-bold"
+                   style="background:#d4af37; color:#000; border-radius:20px;">
+                    Proceed to Checkout
+                </a>
+
+                <a href="{% url 'cars' %}"
+                   class="btn btn-outline-secondary w-100 mt-2"
+                   style="border-radius:20px;">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <!-- Empty Cart -->
+    <div class="text-center py-5">
+        <i class="fas fa-cart-arrow-down fa-4x text-warning mb-4"></i>
+        <h4 class="text-light">Your cart is empty</h4>
+        <p class="text-secondary">Browse our collection and add a car to get started.</p>
+        <a href="{% url 'cars' %}"
+           class="btn mt-3 fw-bold px-4"
+           style="background:#d4af37; color:#000; border-radius:20px;">
+            Browse Cars
+        </a>
+    </div>
+
+    {% endif %}
+</div>
+
+{% endblock %}

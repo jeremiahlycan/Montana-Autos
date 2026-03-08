@@ -21,11 +21,12 @@ from django.urls import path, include
 from productApp import views
 from django.conf import settings
 from django.conf.urls.static import static
-from userApp.views import SignupView, profileView, editProfile
+from userApp.views import SignupView, profileView, editProfile, toggleWishlist, wishlistPage, removeWishlist
  
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", include("cartApp.urls")),
     path("", views.getHome, name="home"),
     path("cars/", views.getProducts, name="cars"),
     path("get-cars/<int:product_id>/", views.getproductbyId, name="get-cars"),
@@ -33,10 +34,10 @@ urlpatterns = [
     path("add-image/<int:product_id>/", views.addImage, name="add-image"),
     path("add-feature/<int:product_id>/", views.addFeature, name="add-feature"),
     path("edit-post/<int:product_id>/", views.editProduct, name="edit-post"),
-    path("delete-post/<int:product_id>", views.deleteProduct, name="delete-post"),
+    path("delete-post/<int:product_id>/", views.deleteProduct, name="delete-post"),
     path("edit-image/<int:image_id>/", views.editImage, name="edit-image"),
     path("delete-image/<int:image_id>/", views.deleteImage, name="delete-image"),
-    path("edit-feature<int:feature_id>/", views.editFeature, name="edit-feature"),
+    path("edit-feature/<int:feature_id>/", views.editFeature, name="edit-feature"),
     path("delete-feature/<int:feature_id>/", views.deleteFeature, name="delete-feature"),
     path("dashboard/", views.dealerDashboard, name="dealer-dashboard"),
     path("accounts/", include("django.contrib.auth.urls")),
@@ -45,9 +46,10 @@ urlpatterns = [
     path("edit-profile/<int:id>/", editProfile, name="edit-profile"),
     path("brands/", views.brands, name="brands"),
     path("brands/<str:category>/", views.brandProducts, name="brand-products"),
-    path("brands/", views.brands, name="brands"),
-    path("brands/<str:category>/", views.brandProducts, name="brand-products"),
-
+    path('wishlist/', wishlistPage, name='wishlist'),
+    path('wishlist/toggle/<int:product_id>/', toggleWishlist, name='toggle-wishlist'),
+    path('wishlist/remove/<int:product_id>/', removeWishlist, name='remove-wishlist'),
+        
 
 
 ]

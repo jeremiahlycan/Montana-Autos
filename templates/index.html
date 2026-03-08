@@ -1,108 +1,173 @@
 {% extends "common.html" %}
-    {% load static %}
-    {% load humanize %}
-    {% block title %} Montana Autos {% endblock title %}
-    {% block content %}
+{% load static %}
+{% load humanize %}
 
-    <div class="container-fluid py-2">
+{% block title %}Montana Luxury Autos{% endblock title %}
 
-        <!-- Banner -->
-        <div class="banner d-flex flex-column justify-content-center align-items-center text-center kiki">
-            <h1 class="brand-title">Montana Luxury Autos</h1>
-            <p class="brand-tagline">Driven by Excellence & Legacy</p>
+{% block content %}
+
+<!-- Hero Section -->
+<section class="mla-hero">
+    <div class="container">
+        <div class="mla-hero-inner">
+            <div class="mla-hero-text">
+                <span class="mla-hero-eyebrow">Premium Collection 2026</span>
+                <h1 class="mla-hero-title">Drive the <em>Extraordinary</em></h1>
+                <p class="mla-hero-subtitle">Handpicked luxury and performance vehicles for the discerning buyer.</p>
+                <div class="mla-hero-actions">
+                    <a href="{% url 'cars' %}" class="mla-btn-filled">Browse Collection</a>
+                    <a href="{% url 'brands' %}" class="mla-btn-outline-dark">Shop by Brand</a>
+                </div>
+                <div class="mla-hero-stats">
+                    <div class="mla-stat">
+                        <span class="mla-stat-number">50+</span>
+                        <span class="mla-stat-label">Vehicles</span>
+                    </div>
+                    <div class="mla-stat-divider"></div>
+                    <div class="mla-stat">
+                        <span class="mla-stat-number">10+</span>
+                        <span class="mla-stat-label">Brands</span>
+                    </div>
+                    <div class="mla-stat-divider"></div>
+                    <div class="mla-stat">
+                        <span class="mla-stat-number">100%</span>
+                        <span class="mla-stat-label">Authentic</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mla-hero-search">
+                <form action="{% url 'cars' %}" method="GET" class="mla-hero-form">
+                    <h5 class="mla-hero-form-title">Find Your Car</h5>
+                    <div class="mla-hero-form-input">
+                        <i class="fas fa-search"></i>
+                        <input type="search"
+                               name="q"
+                               placeholder="Search by brand, model..."
+                               class="mla-hero-search-input">
+                    </div>
+                    <button type="submit" class="mla-btn-filled w-100 mt-3">Search</button>
+                    <a href="{% url 'brands' %}" class="mla-hero-browse-link">
+                        Or browse by brand <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Cars -->
+<section class="mla-featured">
+    <div class="container">
+        <div class="mla-section-header">
+            <div>
+                <span class="mla-section-eyebrow">Handpicked for You</span>
+                <h2 class="mla-section-title">Featured Cars</h2>
+            </div>
+            <a href="{% url 'cars' %}" class="mla-view-all">
+                View All <i class="fas fa-arrow-right ms-1"></i>
+            </a>
         </div>
 
-        <h3 class="text-center my-4">Featured Cars</h3>
-
-        <div class="row">
+        <div class="row g-4">
             {% for product in products %}
-            <div class="col-md-3 mb-4">
+            <div class="col-md-6 col-lg-3 d-flex">
+                <div class="mla-car-card">
 
-                <div class="card h-100">
+                    <!-- Image -->
+                    <div class="mla-car-img-wrap">
+                        {% if product.images.all %}
+                            <a href="{% url 'get-cars' product.id %}">
+                                <img src="{{ product.images.all.first.image.url }}"
+                                     alt="{{ product.title }}"
+                                     class="mla-car-img">
+                            </a>
+                        {% endif %}
 
-                    {% if product.images.all %}
-                        <a href="{% url 'get-cars' product.id %}">
-                            <img class="card-img-top"
-                                src="{{ product.images.all.first.image.url }}"
-                                alt="{{ product.title }}">
-                        </a>
-                    {% endif %}
+                        <!-- Wishlist Heart -->
+                        {% if request.user.is_authenticated %}
+                            <button class="mla-wishlist-btn wishlist-btn"
+                                    data-product-id="{{ product.id }}">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="mla-wishlist-btn">
+                                <i class="fas fa-heart"></i>
+                            </a>
+                        {% endif %}
 
-                    <div class="card-body d-flex flex-column">
+                        <!-- Category Badge -->
+                        <span class="mla-car-badge">{{ product.category|title }}</span>
+                    </div>
 
-                        <h5 class="card-title">
-                            <a href="{% url 'get-cars' product.id %}" 
-                            class="text-light text-decoration-none">
+                    <!-- Body -->
+                    <div class="mla-car-body">
+                        <h5 class="mla-car-title">
+                            <a href="{% url 'get-cars' product.id %}">
                                 {{ product.title|title }}
                             </a>
                         </h5>
+                        <p class="mla-car-desc">{{ product.description|truncatewords:"8" }}</p>
 
-                        <p class="card-text my-1">
-                            {{ product.description|truncatewords:"10" }}
-                        </p>
+                        <div class="mla-car-price-row">
+                            <span class="mla-car-price">₦{{ product.price|intcomma }}</span>
+                            <span class="mla-car-updated">{{ product.updated_at|naturalday|title }}</span>
+                        </div>
 
-                        <p class="my-1">
-                            <b>Price:</b> ${{ product.price|intcomma }}
-                        </p>
-
-                        <p class="my-1">
-                            <i>Last updated:</i> 
-                            {{ product.updated_at|naturalday|title }}
-                        </p>
-
-                        <p class="mb-3">
-                            <b>Category:</b> {{ product.category|title }}
-                        </p>
-
-                        <!-- Buttons -->
-                        <div class="mt-auto pt-3">
-
-                    <!-- Primary Action -->
-                    <a href="https://wa.me/2348145197521?text=Im%20interested%20in%20{{ product.title }}"
-                    class="btn w-100 fw-semibold text-white"
-                    style="
-                        background: linear-gradient(45deg,#25D366,#1ebe5d);
-                        border: none;
-                        border-radius: 18px;
-                        padding: 8px 16px;
-                        font-size: 0.9rem;
-                    ">
-                        💬 Chat on WhatsApp
-                    </a>
-
-                    <!-- Secondary Actions -->
-                    <div class="d-flex justify-content-between gap-2 mt-3">
-
-                        <a href="tel:+2348145197521"
-                        class="btn btn-dark flex-fill"
-                        style="border-radius:16px; padding:6px 10px; font-size:0.8rem;">
-                            📞 Call
-                        </a>
-
-                        <a href="#"
-                         class="btn btn-dark flex-fill"
-                        style="border-radius:16px; padding:6px 10px; font-size:0.8rem;">
-                             Wishlist
-                        </a>
-
-                        <a href="#"
-                        class="btn btn-dark flex-fill"
-                        style="border-radius:16px; padding:6px 10px; font-size:0.8rem;">
-                            Make Order
-                        </a>
-
+                        <!-- Actions -->
+                        <div class="mla-car-actions">
+                            <a href="https://wa.me/2348145197521?text=Im%20interested%20in%20{{ product.title }}"
+                               class="mla-btn-whatsapp">
+                                <i class="fab fa-whatsapp me-1"></i> WhatsApp
+                            </a>
+                            <a href="tel:+2348145197521" class="mla-btn-icon" title="Call">
+                                <i class="fas fa-phone"></i>
+                            </a>
+                            <a href="{% url 'add-to-cart' product.id %}" class="mla-btn-icon mla-btn-cart" title="Add to cart">
+                                <i class="fas fa-shopping-cart"></i>
+                            </a>
+                        </div>
                     </div>
 
                 </div>
-
-
-                    </div>
-                </div>
-
             </div>
             {% endfor %}
         </div>
-
     </div>
+</section>
 
-    {% endblock content %}
+<!-- Wishlist Toast -->
+<div id="wishlist-toast" class="mla-toast">
+    <i class="fas fa-heart me-2"></i>
+    <span id="wishlist-toast-message"></span>
+</div>
+
+<script>
+    document.querySelectorAll('.wishlist-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const productId = this.dataset.productId;
+            const self = this;
+
+            fetch(`/wishlist/toggle/${productId}/`, {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const toast = document.getElementById('wishlist-toast');
+                document.getElementById('wishlist-toast-message').textContent = data.message;
+                toast.classList.add('show');
+
+                if (data.status === 'added') {
+                    self.classList.add('active');
+                } else {
+                    self.classList.remove('active');
+                }
+
+                setTimeout(() => { toast.classList.remove('show'); }, 3000);
+            });
+        });
+    });
+</script>
+
+{% endblock content %}

@@ -6,127 +6,163 @@
     <title>{% block title %}{% endblock title %}</title>
     {% load static %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="{% static "css/style.css" %}">
-    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark"
-     style="background-color:#0b0b0b; border-bottom:2px solid #d4af37;">
+
+    <nav class="mla-nav navbar navbar-expand-lg">
         <div class="container">
-            
-            <a class="navbar-brand fw-bold d-flex align-items-center"
-            href="{% url "home" %}">
-            <span class="brand-mla">MLA</span></a>
+            <div class="mla-nav-inner w-100">
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                <a class="nav-link text-warning" href="{% url "home" %}">Home</a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link text-warning" href="{% url "cars" %}">Cars</a>
-                </li>
-                <li class="nav-item">
-                {% if request.user.is_staff %}
-                <a href="{% url 'dealer-dashboard' %}" class="nav-link text-warning">Dashboard</a>
-                {% endif %}
-                </li>
-                <li class="nav-item">
-                <a class="nav-link text-warning" href="{% url "brands" %}">Brands</a>
-                </li>
-            </ul>
-            <div>
-                    {% if request.user.is_authenticated %}
-
-                    <div class="dropdown">
-                        <button class="border-0 bg-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Hi, {{request.user.first_name}}
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url "profile" request.user.id %}">Profile</a></li>
-                            <li><a class="dropdown-item" href="{% url "password_change" %}">Change Password</a></li>
-                            <li>
-                                <form action="{% url "logout" %}" method="post">
-                                    {% csrf_token %}
-                                    <button class="dropdown-item text-danger">Logout</button>
-                                </form>
-                            </li>
-                        </ul>
+                <!-- Brand -->
+                <a href="{% url 'home' %}" class="mla-brand">
+                    <span class="mla-brand-icon">M</span>
+                    <div class="mla-brand-text">
+                        <span class="mla-brand-name">Montana</span>
+                        <span class="mla-brand-sub">Luxury Autos</span>
                     </div>
-        
-                    {% else %}
-                    <a href="{% url "login" %}" class="btn btn-dark">Login</a>
-                    <a href="{% url "signup" %}" class="btn btn-dark">Sign up</a>
-                    {% endif %}
+                </a>
+
+                <!-- Mobile Toggler -->
+                <button class="mla-toggler navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#navbarNav"
+                        aria-controls="navbarNav"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Collapsible Content -->
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="mla-nav-links ms-auto">
+
+                        <!-- Nav Links -->
+                        <a href="{% url 'home' %}" class="mla-nav-link">Home</a>
+                        <a href="{% url 'cars' %}" class="mla-nav-link">Cars</a>
+                        <a href="{% url 'brands' %}" class="mla-nav-link">Brands</a>
+                        {% if request.user.is_staff %}
+                            <a href="{% url 'dealer-dashboard' %}" class="mla-nav-link">Dashboard</a>
+                        {% endif %}
+
+                        <!-- Search -->
+                        <form class="mla-search" action="{% url 'cars' %}" method="GET">
+                            <i class="fas fa-search mla-search-icon"></i>
+                            <input type="search"
+                                   name="q"
+                                   placeholder="Search cars..."
+                                   class="mla-search-input">
+                        </form>
+
+                        <!-- Cart -->
+                        <a href="{% url 'cart' %}" class="mla-icon-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                            {% with total_cart=request.session.cart %}
+                                {% if total_cart %}
+                                    <span class="mla-badge">{{ total_cart.values|length }}</span>
+                                {% endif %}
+                            {% endwith %}
+                        </a>
+
+                        <!-- Auth -->
+                        {% if request.user.is_authenticated %}
+                            <div class="dropdown">
+                                <button class="mla-user-btn dropdown-toggle"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <i class="fas fa-user-circle me-1"></i>
+                                    {{ request.user.first_name }}
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end mla-dropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'profile' request.user.id %}">
+                                            <i class="fas fa-user me-2"></i>Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'password_change' %}">
+                                            <i class="fas fa-lock me-2"></i>Change Password
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form action="{% url 'logout' %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="mla-btn-outline">Login</a>
+                            <a href="{% url 'signup' %}" class="mla-btn-filled">Sign up</a>
+                        {% endif %}
+
+                    </div>
                 </div>
+
             </div>
         </div>
     </nav>
 
+    <!-- Flash Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     {% block content %}{% endblock content %}
 
-<footer class="lux-footer mt-5">
-  <div class="container py-5">
-    <div class="row gy-4">
+    <footer class="mla-footer">
+        <div class="container">
+            <div class="mla-footer-grid">
 
-      <!-- Brand / About -->
-      <div class="col-md-4">
-        <h4 class="lux-footer-title">MONTANA LUXURY AUTOS</h4>
-        <p class="lux-footer-text">
-          Premium luxury and performance vehicles.
-          Drive excellence. Own prestige.
-        </p>
-      </div>
+                <div class="mla-footer-brand">
+                    <span class="mla-footer-logo">MLA</span>
+                    <p>Premium luxury and performance vehicles. Drive excellence. Own prestige.</p>
+                </div>
 
-      <!-- Quick Links -->
-      <div class="col-md-4">
-        <h5 class="lux-footer-title">Quick Links</h5>
-        <ul class="lux-footer-links">
-          <li><a href="{% url 'cars' %}">Browse Cars</a></li>
-          <li><a href="#">About Us</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-      </div>
+                <div>
+                    <h6 class="mla-footer-heading">Quick Links</h6>
+                    <ul class="mla-footer-links">
+                        <li><a href="{% url 'cars' %}">Browse Cars</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
 
-      <!-- Social Media -->
-      <div class="col-md-4">
-        <h5 class="lux-footer-title">Connect With Us</h5>
+                <div>
+                    <h6 class="mla-footer-heading">Connect</h6>
+                    <div class="mla-footer-socials">
+                        <a href="https://wa.me/2348145197521" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://x.com/MontanaLuxeAG" target="_blank"><i class="fab fa-x-twitter"></i></a>
+                        <a href="https://www.tiktok.com/@montanaluxesag" target="_blank"><i class="fab fa-tiktok"></i></a>
+                        <a href="https://www.instagram.com/montanaluxeag" target="_blank"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
 
-        <div class="lux-socials">
-          <a href="https://wa.me/2348145197521" target="_blank" aria-label="WhatsApp">
-            <i class="fab fa-whatsapp"></i>
-          </a>
+            </div>
 
-          <a href="https://x.com/MontanaLuxeAG" target="_blank" aria-label="X">
-            <i class="fab fa-x-twitter"></i>
-          </a>
-
-          <a href="https://www.tiktok.com/@montanaluxesag?_r=1&_t=ZS-93T03MWq4RR" target="_blank" aria-label="TikTok">
-            <i class="fab fa-tiktok"></i>
-          </a>
-
-          <a href="https://www.instagram.com/montanaluxeag?igsh=OGNwOXFqNTdjeXJ6&utm_source=qr" target="_blank" aria-label="Instagram">
-            <i class="fab fa-instagram"></i>
-          </a>
+            <div class="mla-footer-bottom">
+                <span>© {{ now|date:"Y" }} Montana Luxury Autos. All rights reserved.</span>
+            </div>
         </div>
-      </div>
+    </footer>
 
-    </div>
-
-    <hr class="lux-divider">
-
-    <div class="text-center lux-footer-bottom">
-      © {{ now|date:"Y" }} MONTANA LUXURY AUTOS. All rights reserved.
-    </div>
-  </div>
-</footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,152 +1,521 @@
 {% extends "common.html" %}
-    {% block title %} {{ product.title }} {% endblock title %}
-    {% load static %}
-    {% block content %}
-    {% load humanize %}
+{% block title %} {{ product.title }} {% endblock title %}
+{% load static %}
+{% load humanize %}
+{% block content %}
 
-    <div class="container my-4">
-    <div class="row g-4 align-items-start">
+<div class="container py-5 mb-5">
 
-        <div class="col-md-6 d-flex flex-column align-items-center">
+    <!-- Staff Actions -->
+    {% if request.user.is_staff or request.user.is_superuser or request.user == product.created_by %}
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        <a href="{% url 'edit-post' product.id %}"
+           class="mla-admin-btn">
+            <i class="fas fa-edit me-1"></i> Edit
+        </a>
+        <a href="{% url 'delete-post' product.id %}"
+           class="mla-admin-btn danger">
+            <i class="fas fa-trash me-1"></i> Delete
+        </a>
+        <a href="{% url 'add-image' product.id %}"
+           class="mla-admin-btn">
+            <i class="fas fa-image me-1"></i> Add Image
+        </a>
+        <a href="{% url 'add-feature' product.id %}"
+           class="mla-admin-btn">
+            <i class="fas fa-plus me-1"></i> Add Feature
+        </a>
+    </div>
+    {% endif %}
 
-        {% if request.user.is_staff or request.user.is_super or request.user == product.created_by %}
-            <div class="d-flex gap-2 mb-3 justify-content-center">
-            <a href="{% url 'edit-post' product.id %}" class="btn btn-sm btn-outline-warning">Edit</a>
-            <a href="{% url 'delete-post' product.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
-            <a href="{% url 'add-image' product.id %}" class="btn btn-sm btn-outline-warning">Add Image</a>
-            <a href="{% url 'add-feature' product.id %}" class="btn btn-sm btn-outline-warning">Add Feature</a>
+    <div class="row g-5">
+
+        <!-- Left: Images -->
+        <div class="col-lg-6">
+
+            {% if product.images.exists %}
+
+            <!-- Main Image -->
+            <div class="mla-product-main-img-wrap">
+                <img id="mainProductImage"
+                     src="{{ product.images.first.image.url }}"
+                     class="mla-product-main-img"
+                     alt="{{ product.title }}">
+                <span id="imageCounter" class="mla-img-counter">
+                    1 / {{ product.images.count }}
+                </span>
+
+                <!-- Prev/Next Arrows -->
+                <button class="mla-img-arrow left" onclick="prevImage()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="mla-img-arrow right" onclick="nextImage()">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
-        {% endif %}
 
-        {% if product.images.exists %}
-            <div class="position-relative w-100">
-            <img id="mainProductImage"
-                src="{{ product.images.first.image.url }}"
-                class="img-fluid rounded-4 shadow-lg mb-3"
-                style="max-height:420px; width:100%; object-fit:cover;">
-
-            <span id="imageCounter"
-                    class="position-absolute top-0 end-0 m-2 px-2 py-1 rounded"
-                    style="background:rgba(0,0,0,.7); color:#d4af37; font-size:13px;">
-                1 / {{ product.images.count }}
-            </span>
-            </div>
-
-
-            <div class="d-flex flex-wrap gap-2 justify-content-center">
-            {% for image in product.images.all %}
-                <div class="text-center">
-                <img src="{{ image.image.url }}"
-                    class="img-fluid rounded-3 shadow-sm gallery-thumb"
-                    style="height:80px; width:80px; object-fit:cover; border:1px solid rgba(212,175,55,.3); cursor:pointer;"
-                    alt="{{ product.title }}">
-                
-                {% if request.user.is_staff or request.user.is_super or request.user == product.created_by %}
-                    <div class="mt-1 d-flex justify-content-center gap-1">
-                    <a href="{% url 'edit-image' image.id %}" class="btn btn-sm btn-outline-warning px-2 py-0">Edit</a>
-                    <a href="{% url 'delete-image' image.id %}" class="btn btn-sm btn-outline-danger px-2 py-0">Delete</a>
+            <!-- Thumbnails -->
+            <div class="mla-thumbs">
+                {% for image in product.images.all %}
+                <div class="mla-thumb-wrap">
+                    <img src="{{ image.image.url }}"
+                         class="mla-thumb gallery-thumb {% if forloop.first %}active{% endif %}"
+                         alt="{{ product.title }}">
+                    {% if request.user.is_staff or request.user.is_superuser or request.user == product.created_by %}
+                    <div class="mla-thumb-actions">
+                        <a href="{% url 'edit-image' image.id %}" class="mla-admin-btn-xs">Edit</a>
+                        <a href="{% url 'delete-image' image.id %}" class="mla-admin-btn-xs danger">Del</a>
                     </div>
-                {% endif %}
-                </div>
-            {% endfor %}
-            </div>
-        {% endif %}
-
-        </div> 
-
-        
-        <div class="col-md-6 d-flex justify-content-center">
-        <div class="card border-0 shadow-lg p-3"
-            style="background:#121212; border-radius:18px; max-width:600px; width:100%;">
-            <div class="card-body">
-            <h5 class="card-title text-warning">{{ product.title|title }}</h5>
-            <p class="text-light mb-2"><b class="text-warning">Price:</b> ${{ product.price|intcomma }}</p>
-            <p class="text-light mb-2"><b class="text-warning">Category:</b> {{ product.category|title }}</p>
-            <p class="text-light mb-2">{{ product.description }}</p>
-            <hr style="border-color: rgba(212,175,55,.3);">
-
-                <h5 class="text-warning mt-3">Vehicle Details</h5>
-
-                <table class="table table-dark table-borderless mt-2">
-                <tbody>
-                    <tr>
-                    <td class="text-muted">Condition</td>
-                    <td>Brand New</td>
-                    </tr>
-                    <tr>
-                    <td class="text-muted">Transmission</td>
-                    <td>Automatic</td>
-                    </tr>
-                    <tr>
-                    <td class="text-muted">Fuel Type</td>
-                    <td>Petrol</td>
-                    </tr>
-                    <tr>
-                    <td class="text-muted">Drive Type</td>
-                    <td>AWD</td>
-                    </tr>
-                </tbody>
-                </table>
-
-            <p class="text-muted mb-2">Last updated: {{ product.updated_at|naturalday|title }}</p>
-
-            {% if product.features.exists %}
-                <h5 class="text-warning mt-3">Features:</h5>
-                <ul class="list-unstyled text-light">
-                {% for feature in product.features.all %}
-                    <li class="d-flex justify-content-between align-items-center mb-2">
-                    <span>
-                        <strong>{{ feature.label }}:</strong> {{ feature.value }}
-                    </span>
-                    {% if request.user.is_staff or request.user.is_super or request.user == product.created_by  %}
-                        <span class="d-flex gap-1">
-                        <a href="{% url 'edit-feature' feature.id %}" class="btn btn-sm btn-outline-warning px-2 py-0">Edit</a>
-                        <a href="{% url 'delete-feature' feature.id %}" class="btn btn-sm btn-outline-danger px-2 py-0">Delete</a>
-                        </span>
                     {% endif %}
-                    </li>
+                </div>
                 {% endfor %}
-                </ul>
+            </div>
+
             {% endif %}
-            <a href="https://wa.me/2348145197521?text=Im%20interested%20in%20{{ product.title }}"class="btn fw-bold btn-outline-success"style="border-radius:16px;padding:10px 18px;font-size:0.95rem;">💬 Chat on WhatsApp</a>
-            <a href="tel:+2348145197521"class="btn btn-outline-warning"style="border-radius:16px;padding:8px 16px;font-size:0.85rem;">📞 Call Dealer</a>
-            
         </div>
-        </div> 
 
-    </div> 
-    </div> 
+        <!-- Right: Details -->
+        <div class="col-lg-6">
 
-    <script>
-    const mainImage = document.getElementById('mainProductImage');
-    const thumbnails = Array.from(document.querySelectorAll('.gallery-thumb'));
-    const counter = document.getElementById('imageCounter');
-    let currentIndex = 0;
+            <!-- Breadcrumb -->
+            <div class="mla-breadcrumb">
+                <a href="{% url 'home' %}">Home</a>
+                <span>/</span>
+                <a href="{% url 'cars' %}">Cars</a>
+                <span>/</span>
+                <span>{{ product.title|title }}</span>
+            </div>
 
-    function updateImage(index) {
-        if (!thumbnails.length) return;
-        mainImage.src = thumbnails[index].src;
-        counter.textContent = `${index + 1} / ${thumbnails.length}`;
-    }
+            <!-- Category Badge -->
+            <span class="mla-product-category">{{ product.category|title }}</span>
 
-    thumbnails.forEach((thumb, i) => {
-        thumb.addEventListener('click', () => {
+            <!-- Title & Price -->
+            <h1 class="mla-product-title">{{ product.title|title }}</h1>
+            <div class="mla-product-price">₦{{ product.price|intcomma }}</div>
+
+            <!-- Description -->
+            <p class="mla-product-desc">{{ product.description }}</p>
+
+            <hr class="mla-divider">
+
+            <!-- Vehicle Details -->
+            <h5 class="mla-details-heading">Vehicle Details</h5>
+            <div class="mla-details-grid">
+                <div class="mla-detail-item">
+                    <span class="mla-detail-icon"><i class="fas fa-car"></i></span>
+                    <div>
+                        <span class="mla-detail-label">Condition</span>
+                        <span class="mla-detail-value">Brand New</span>
+                    </div>
+                </div>
+                <div class="mla-detail-item">
+                    <span class="mla-detail-icon"><i class="fas fa-cog"></i></span>
+                    <div>
+                        <span class="mla-detail-label">Transmission</span>
+                        <span class="mla-detail-value">Automatic</span>
+                    </div>
+                </div>
+                <div class="mla-detail-item">
+                    <span class="mla-detail-icon"><i class="fas fa-gas-pump"></i></span>
+                    <div>
+                        <span class="mla-detail-label">Fuel Type</span>
+                        <span class="mla-detail-value">Petrol</span>
+                    </div>
+                </div>
+                <div class="mla-detail-item">
+                    <span class="mla-detail-icon"><i class="fas fa-road"></i></span>
+                    <div>
+                        <span class="mla-detail-label">Drive Type</span>
+                        <span class="mla-detail-value">AWD</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            {% if product.features.exists %}
+            <hr class="mla-divider">
+            <h5 class="mla-details-heading">Features</h5>
+            <div class="mla-features-list">
+                {% for feature in product.features.all %}
+                <div class="mla-feature-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="mla-feature-label">{{ feature.label }}</span>
+                            <span class="mla-feature-value">{{ feature.value }}</span>
+                        </div>
+                        {% if request.user.is_staff or request.user.is_superuser or request.user == product.created_by %}
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'edit-feature' feature.id %}" class="mla-admin-btn-xs">Edit</a>
+                            <a href="{% url 'delete-feature' feature.id %}" class="mla-admin-btn-xs danger">Del</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <hr class="mla-divider">
+
+            <!-- Last Updated -->
+            <p class="mla-updated">
+                <i class="fas fa-clock me-1"></i>
+                Last updated: {{ product.updated_at|naturalday|title }}
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="mla-product-actions">
+                <a href="https://wa.me/2348145197521?text=Im%20interested%20in%20{{ product.title }}"
+                   class="mla-btn-whatsapp-lg">
+                    <i class="fab fa-whatsapp me-2"></i> Chat on WhatsApp
+                </a>
+                <a href="tel:+2348145197521"
+                   class="mla-btn-call">
+                    <i class="fas fa-phone me-2"></i> Call
+                </a>
+                <a href="{% url 'add-to-cart' product.id %}"
+                   class="mla-btn-cart-lg">
+                    <i class="fas fa-shopping-cart me-2"></i> Add to Cart
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+/* Single Product Page Styles */
+.mla-admin-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: var(--gray-100);
+    color: var(--black);
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s;
+}
+
+.mla-admin-btn:hover { background: var(--gray-200); color: var(--black); }
+.mla-admin-btn.danger { color: #e53935; }
+.mla-admin-btn.danger:hover { background: #fdecea; border-color: #e53935; }
+
+.mla-admin-btn-xs {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    background: var(--gray-100);
+    color: var(--black);
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s;
+}
+
+.mla-admin-btn-xs.danger { color: #e53935; }
+.mla-admin-btn-xs:hover { background: var(--gray-200); color: var(--black); }
+
+.mla-product-main-img-wrap {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--gray-100);
+    height: 400px;
+    margin-bottom: 16px;
+}
+
+.mla-product-main-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.mla-img-counter {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(0,0,0,0.6);
+    color: var(--white);
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.mla-img-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--white);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    font-size: 0.8rem;
+    color: var(--black);
+    transition: all 0.2s;
+    z-index: 2;
+}
+
+.mla-img-arrow:hover { background: var(--black); color: var(--white); }
+.mla-img-arrow.left { left: 12px; }
+.mla-img-arrow.right { right: 12px; }
+
+.mla-thumbs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mla-thumb-wrap { position: relative; }
+
+.mla-thumb {
+    width: 76px;
+    height: 76px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid var(--gray-200);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mla-thumb:hover,
+.mla-thumb.active { border-color: var(--gold); }
+
+.mla-thumb-actions {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    justify-content: center;
+}
+
+.mla-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--gray-400);
+    margin-bottom: 16px;
+}
+
+.mla-breadcrumb a { color: var(--gray-400); transition: color 0.2s; }
+.mla-breadcrumb a:hover { color: var(--black); }
+.mla-breadcrumb span:last-child { color: var(--black); font-weight: 500; }
+
+.mla-product-category {
+    display: inline-block;
+    background: var(--gold-light);
+    color: #8a6d1a;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 30px;
+    margin-bottom: 12px;
+}
+
+.mla-product-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 700;
+    color: var(--black);
+    line-height: 1.2;
+    margin-bottom: 12px;
+}
+
+.mla-product-price {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 16px;
+}
+
+.mla-product-desc {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: 0;
+}
+
+.mla-divider {
+    border: none;
+    border-top: 1px solid var(--gray-200);
+    margin: 24px 0;
+}
+
+.mla-details-heading {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 16px;
+}
+
+.mla-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.mla-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--gray-100);
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+.mla-detail-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--white);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.mla-detail-label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.mla-detail-value {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--black);
+}
+
+.mla-features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mla-feature-item {
+    background: var(--gray-100);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.mla-feature-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--black);
+    margin-right: 6px;
+}
+
+.mla-feature-value {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+}
+
+.mla-updated {
+    font-size: 0.8rem;
+    color: var(--gray-400);
+    margin-bottom: 20px;
+}
+
+.mla-product-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mla-btn-whatsapp-lg {
+    flex: 1;
+    min-width: 160px;
+    background: #25D366;
+    color: var(--white) !important;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.mla-btn-whatsapp-lg:hover { background: #1ebe5d; transform: translateY(-1px); }
+
+.mla-btn-call {
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: var(--gray-100);
+    color: var(--black) !important;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    border: 1px solid var(--gray-200);
+}
+
+.mla-btn-call:hover { background: var(--gray-200); }
+
+.mla-btn-cart-lg {
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: var(--black);
+    color: var(--white) !important;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.mla-btn-cart-lg:hover { background: var(--gold); color: var(--black) !important; }
+</style>
+
+<script>
+const mainImage = document.getElementById('mainProductImage');
+const thumbnails = Array.from(document.querySelectorAll('.gallery-thumb'));
+const counter = document.getElementById('imageCounter');
+let currentIndex = 0;
+
+function updateImage(index) {
+    if (!thumbnails.length) return;
+    mainImage.src = thumbnails[index].src;
+    counter.textContent = `${index + 1} / ${thumbnails.length}`;
+    thumbnails.forEach(t => t.classList.remove('active'));
+    thumbnails[index].classList.add('active');
+}
+
+function nextImage() {
+    currentIndex = (currentIndex + 1) % thumbnails.length;
+    updateImage(currentIndex);
+}
+
+function prevImage() {
+    currentIndex = (currentIndex - 1 + thumbnails.length) % thumbnails.length;
+    updateImage(currentIndex);
+}
+
+thumbnails.forEach((thumb, i) => {
+    thumb.addEventListener('click', () => {
         currentIndex = i;
         updateImage(currentIndex);
-        });
     });
+});
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight') {
-        currentIndex = (currentIndex + 1) % thumbnails.length;
-        updateImage(currentIndex);
-        }
-        if (e.key === 'ArrowLeft') {
-        currentIndex = (currentIndex - 1 + thumbnails.length) % thumbnails.length;
-        updateImage(currentIndex);
-        }
-    });
-    </script>
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') nextImage();
+    if (e.key === 'ArrowLeft') prevImage();
+});
+</script>
 
-
-    {% endblock content %}
+{% endblock content %}

@@ -66,20 +66,19 @@ def getHome(request):
     )
 
 def getProducts(request):
+    q = request.GET.get('q', '')
     cars = (Product.objects
             .all()
-            .prefetch_related(
-                "features",
-                "images",
-                "reviews"
-            )
+            .prefetch_related("features", "images", "reviews")
             .order_by("-created_at")
             )
+    if q:
+        cars = cars.filter(title__icontains=q)
 
     return render(
         request,
         template_name="products.html",
-        context={"products":cars}
+        context={"products": cars, "query": q}
     )
 
 def getproductbyId(request, product_id):  
@@ -106,7 +105,7 @@ def addproduct(request):
                 message=f"A new product has been added by {request.user.first_name} {request.user.last_name}",
                 from_email=f"MLA <{settings.DEFAULT_FROM_EMAIL}>",
                 recipient_list=[request.user.email],
-                fail_silently=False
+                fail_silently=True
             )
             messages.success(request, 'Car added successfully')
         else:
@@ -184,7 +183,7 @@ def editProduct(request, product_id):
                 message=f"Product ID0{product.id} has been edited by {request.user.first_name} {request.user.last_name}",
                 from_email=f"MLA <{settings.DEFAULT_FROM_EMAIL}>",
                 recipient_list=[request.user.email],
-                fail_silently=False
+                fail_silently=True
             )
         else:
             messages.error(request, 'An error occured')
@@ -360,16 +359,34 @@ def brands(request):
     )
 
 def brandProducts(request, category):
-    products = Product.objects.filter(category=category)
+    valid_categories = dict(Product.CATEGORY_CHOICES)
+    
+    if category not in valid_categories:
+        return render(
+            request,
+            "404.html",
+            {"message": f"Brand '{category}' does not exist."},
+            status=404
+        )
 
-    category_display = dict(Product.CATEGORY_CHOICES).get(category, category)
+    products = (
+        Product.objects
+        .filter(category=category)
+        .prefetch_related("features", "images", "reviews")
+        .order_by("-created_at")
+    )
+
+    category_display = valid_categories[category]
 
     return render(
         request,
         "products.html",
         {
             "products": products,
-            "brand_name": category,
-             "brand_name": category_display
+            "brand_name": category_display,
+            "category_key": category,
+            "total": products.count()
         }
     )
+
+

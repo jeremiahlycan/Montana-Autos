@@ -39,7 +39,7 @@
         ➕ Add New Car
         </a>
         {% endif %}
-        <a href="{% url 'cars' %}" class="btn btn-outline-light">
+        <a href="{% url 'cars' %}" class="btn btn-outline-dark">
         🚗 View Marketplace
         </a>
     </div>
@@ -65,7 +65,7 @@
                 {% for product in products %}
                 <tr>
                     <td>{{ product.title }}</td>
-                    <td>${{ product.price|intcomma }}</td>
+                    <td>₦{{ product.price|intcomma }}</td>
                     <td>{{ product.images.count }}</td>
                     <td>{{ product.quantity }}</td>
                     <td>

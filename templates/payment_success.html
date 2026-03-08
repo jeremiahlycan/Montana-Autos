@@ -1,0 +1,20 @@
+{% extends "common.html" %}
+{% block title %}Payment Successful — MLA{% endblock %}
+{% block content %}
+
+<div class="container py-5 text-center">
+    <div class="py-5">
+        <i class="fas fa-check-circle fa-5x text-warning mb-4"></i>
+        <h2 class="text-warning mb-3">Payment Successful!</h2>
+        <p class="text-light mb-4">
+            Thank you for your order. Our team will contact you shortly to arrange delivery.
+        </p>
+        <a href="{% url 'cars' %}"
+           class="btn fw-bold px-5 py-2"
+           style="background:#d4af37; color:#000; border-radius:20px;">
+            Continue Browsing
+        </a>
+    </div>
+</div>
+
+{% endblock %}
